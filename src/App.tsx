@@ -87,16 +87,31 @@ export default function App() {
       <main className="max-w-7xl mx-auto px-6 py-24 md:px-12 md:py-32">
         {/* Hero Section */}
         <section className="mb-32">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, ease: "circOut" }}
-            className="mb-12"
-          >
-            <h1 className="font-display text-7xl md:text-[140px] leading-[0.85] tracking-tighter mb-8">
-              beesoob
-            </h1>
-          </motion.div>
+          <div className="flex flex-col lg:flex-row gap-12 items-end mb-12">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, ease: "circOut" }}
+              className="flex-1"
+            >
+              <h1 className="font-display text-7xl md:text-[140px] leading-[0.85] tracking-tighter mb-8">
+                beesoob
+              </h1>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="w-full lg:w-1/2 aspect-video lg:aspect-[16/7] rounded-[40px] overflow-hidden border border-black/5"
+            >
+              <img 
+                src="https://raw.githubusercontent.com/suebin91-blip/beesoob/f8b2db2acea67dbc52c403953fbc6827ab941036/IMG_8915.JPG" 
+                alt="beesoob visual" 
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+            </motion.div>
+          </div>
           
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
@@ -188,9 +203,12 @@ export default function App() {
             {/* Experience Item 1 */}
             <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-12 group">
               <div className="relative overflow-hidden rounded-3xl aspect-[4/3] bg-brand-blue">
-                <div className="absolute inset-0 flex items-center justify-center">
-                   <Video className="w-16 h-16 opacity-20" />
-                </div>
+                <img 
+                  src="https://raw.githubusercontent.com/suebin91-blip/beesoob/f8b2db2acea67dbc52c403953fbc6827ab941036/IMG_8915.JPG" 
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  alt="Do bong Creator"
+                  referrerPolicy="no-referrer"
+                />
                 <div className="absolute top-8 left-8">
                   <span className="text-xs font-bold uppercase tracking-widest bg-white/80 backdrop-blur px-3 py-1 rounded-full border border-black/5">Creative</span>
                 </div>
@@ -218,9 +236,14 @@ export default function App() {
                 </div>
               </div>
               <div className="relative overflow-hidden rounded-3xl aspect-[4/3] bg-brand-purple order-1 md:order-2">
-                <div className="absolute inset-0 flex items-center justify-center">
-                   <Book className="w-16 h-16 opacity-20" />
-                </div>
+                <video 
+                  src="https://raw.githubusercontent.com/suebin91-blip/beesoob/743529564c549919a9b6fb1a47ed36ab0cb36055/260423_%EA%B0%95%EB%B6%81%EC%B2%AD%EB%85%84%EC%84%BC%ED%84%B0(1).mp4" 
+                  autoPlay 
+                  loop 
+                  muted 
+                  playsInline 
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
                 <div className="absolute top-8 left-8">
                   <span className="text-xs font-bold uppercase tracking-widest bg-white/80 backdrop-blur px-3 py-1 rounded-full border border-black/5">Management</span>
                 </div>
