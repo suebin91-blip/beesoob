@@ -3,8 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { motion } from "motion/react";
-import { Mail, Phone, MapPin, Calendar, ExternalLink, Award, Scissors, Video, Book } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { 
+  Mail, Phone, MapPin, Calendar, ExternalLink, 
+  Award, Scissors, Video, Book, Send, 
+  MessageSquare, X, Sparkles, Loader2 
+} from "lucide-react";
+import { askChatbot } from "./services/geminiService";
 
 const SectionHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
   <div className="mb-12">
@@ -53,6 +59,147 @@ const SkillCard = ({ title, icon: Icon, items, colorClass }: { title: string, ic
     </div>
   </motion.div>
 );
+
+const ChatBot = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<{ role: 'user' | 'model', text: string }[]>([
+    { role: 'model', text: '안녕하세요! 이수빈 패션 기술자의 포트폴리오 비서입니다. 궁금한 점이 있으신가요?' }
+  ]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isLoading]);
+
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
+
+    const userMessage = input.trim();
+    setInput('');
+    setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
+    setIsLoading(true);
+
+    const history = messages.map(m => ({
+      role: m.role,
+      parts: [{ text: m.text }]
+    }));
+
+    const response = await askChatbot(userMessage, history);
+    setMessages(prev => [...prev, { role: 'model', text: response || '죄송합니다. 오류가 발생했습니다.' }]);
+    setIsLoading(false);
+  };
+
+  return (
+    <>
+      {/* Floating Button */}
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-8 right-8 z-[60] w-16 h-16 bg-black text-white rounded-full flex items-center justify-center shadow-2xl transition-shadow hover:shadow-black/20"
+      >
+        <MessageSquare className="w-6 h-6" />
+      </motion.button>
+
+      {/* Chat Window */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="fixed bottom-28 right-8 z-[60] w-[90vw] md:w-[400px] h-[600px] bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-black/5 flex flex-col overflow-hidden"
+          >
+            {/* Header */}
+            <div className="p-6 border-b border-black/5 flex justify-between items-center bg-black text-white">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-brand-purple flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-black" />
+                </div>
+                <div>
+                  <h3 className="font-display text-lg tracking-tight">AI Assistant</h3>
+                  <p className="text-[10px] uppercase font-bold tracking-widest opacity-60">beesoob Portfolio</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsOpen(false)}
+                className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Messages Area */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-[#F9F9F9]">
+              {messages.map((m, i) => (
+                <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`
+                    max-w-[80%] p-4 rounded-2xl text-sm font-medium leading-relaxed
+                    ${m.role === 'user' 
+                      ? 'bg-black text-white rounded-tr-none' 
+                      : 'bg-white text-black border border-black/5 shadow-sm rounded-tl-none'}
+                  `}>
+                    {m.text}
+                  </div>
+                </div>
+              ))}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-white border border-black/5 p-4 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                    <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Thinking...</span>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input Area */}
+            <div className="p-6 border-t border-black/5 bg-white">
+              <div className="flex gap-3">
+                <input 
+                  type="text" 
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                  placeholder="무엇이든 물어보세요..."
+                  className="flex-1 bg-[#F9F9F9] border border-black/5 rounded-2xl px-6 py-4 text-sm font-medium focus:outline-none focus:border-black/20 transition-colors"
+                />
+                <button 
+                  onClick={handleSend}
+                  disabled={isLoading || !input.trim()}
+                  className="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-800 transition-colors shadow-lg"
+                >
+                  <Send className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="mt-4 flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                {['최근 경력은?', '보유 기술', '연락처'].map((hint) => (
+                  <button 
+                    key={hint}
+                    onClick={() => {
+                      setInput(hint);
+                      // Automatic send is better for UX here but let's just prefill for now
+                    }}
+                    className="whitespace-nowrap text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 border border-black/5 rounded-full hover:bg-black hover:text-white transition-colors"
+                  >
+                    {hint}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
 
 export default function App() {
   const containerVariants = {
@@ -343,6 +490,7 @@ export default function App() {
             </div>
           </div>
         </footer>
+        <ChatBot />
       </main>
     </div>
   );
